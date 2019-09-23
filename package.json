@@ -4,7 +4,7 @@
   "description": "충북대학교 소프트웨어중심대학 API 서버",
   "main": "server.js",
   "scripts": {
-    "start": "pm2 start server.js --name 'api-server'",
+    "start": "pm2 start server.js --name api-server",
     "dev": "nodemon server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
