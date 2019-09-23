@@ -1,0 +1,35 @@
+{
+  "name": "cbnu-sw-api-server",
+  "version": "0.0.1",
+  "description": "충북대학교 소프트웨어중심대학 API 서버",
+  "main": "server.js",
+  "scripts": {
+    "start": "pm2 start server.js --name 'api-server'",
+    "dev": "nodemon server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cbnu",
+    "충북대학교",
+    "소프트웨어중심대학"
+  ],
+  "author": "teamleaf <teamleaf.dev@gmail.com> (http://www.salespalm.co.kr)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "http-errors": "^1.7.3",
+    "jsonwebtoken": "^8.5.1",
+    "mkdirp": "^0.5.1",
+    "mongoose": "^5.7.1",
+    "morgan": "^1.9.1",
+    "multer": "^1.4.2",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.2"
+  }
+}
