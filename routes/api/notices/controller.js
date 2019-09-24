@@ -43,8 +43,6 @@ const updateNotice = async (req, res, next) => {
   const { id } = req.params;
   const $set = req.body;
 
-  console.log($set);
-
   try {
     const notice = await Notice.findById(id);
     if (String(notice.author) !== String(req.user._id)) {
