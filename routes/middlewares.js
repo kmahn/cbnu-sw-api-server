@@ -10,10 +10,7 @@ const isAuthenticated = (req, res, next) => {
 
 const hasRoles = (...roles) => [
   isAuthenticated,
-  (req, res, next) => {
-    console.log(req.user.role);
-    roles.includes(req.user.role) ? next() : next(createErrors(403, 'forbidden'))
-  }
+  (req, res, next) => roles.includes(req.user.role) ? next() : next(createErrors(403, 'forbidden'))
 ];
 
 exports.authenticate = async (req, res, next) => {

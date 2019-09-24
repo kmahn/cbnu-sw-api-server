@@ -43,12 +43,14 @@ const updateNotice = async (req, res, next) => {
   const { id } = req.params;
   const $set = req.body;
 
+  console.log($set);
+
   try {
     const notice = await Notice.findById(id);
     if (String(notice.author) !== String(req.user._id)) {
       return next(createErrors(403, 'forbidden'));
     }
-    notice.updateOne({ $set });
+    await notice.updateOne({ $set });
     res.json({ success: true });
   } catch (e) {
     next(e);
