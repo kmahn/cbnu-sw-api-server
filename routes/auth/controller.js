@@ -16,7 +16,7 @@ const login = (...roles) => (req, res, next) => {
       return next(err);
     }
 
-    if (roles.includes(user.role)) {
+    if (!roles.includes(user.role)) {
       return next(createErrors(404, 'user not found'));
     }
 

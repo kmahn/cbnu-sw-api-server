@@ -3,7 +3,7 @@ const { Notice } = require('../../../models');
 
 const getNotices = async (req, res, next) => {
   try {
-    const data = await Notice.find().sort('-no').populate({ path: 'author', select: 'username' });
+    const data = await Notice.find().sort('-no').populate({ path: 'author', select: 'name' });
     res.json({ success: true, data });
   } catch (e) {
     next(e);
@@ -13,7 +13,7 @@ const getNotices = async (req, res, next) => {
 const getNotice = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const notice = await Notice.findById(id).populate({ path: 'author', select: 'username' });
+    const notice = await Notice.findById(id).populate({ path: 'author', select: 'name' });
     notice.hits++;
     notice.save();
     res.json({ success: true, data: notice });
@@ -24,7 +24,8 @@ const getNotice = async (req, res, next) => {
 
 const createNotice = async (req, res, next) => {
   let notice = req.body;
-  notice.user = req.user._id;
+  delete notice._id;
+  notice.author = req.user._id;
   try {
     notice = await Notice.create(notice);
     res.json({ success: true, data: notice._id });

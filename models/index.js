@@ -35,7 +35,8 @@ async function createAdminAccount() {
     const admin = {
       username: process.env.ADMIN_USERNAME,
       password: process.env.ADMIN_PASSWORD,
-      name: process.env.ADMIN_NAME
+      name: process.env.ADMIN_NAME,
+      role: 'admin'
     };
     await User.create(admin);
   }
