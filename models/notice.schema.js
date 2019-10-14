@@ -21,6 +21,7 @@ const schema = new Schema({
     type: Number,
     default: 0,
   },
+  attachments: [{ type: Schema.Types.ObjectId, ref: 'File', required: true }]
 }, {
   timestamps: true
 });

@@ -4,7 +4,7 @@
 .env
 
 #resources directory
-/resources
+/uploads
 
 # dependencies
 /node_modules

@@ -1,5 +1,23 @@
 const createErrors = require('http-errors');
-const { Notice } = require('../../../models');
+const cheerio = require('cheerio');
+const { Notice, File } = require('../../../models');
+
+const getUrls = async (id, notice) => {
+  const attachments = await Promise.all(
+    (notice.attachments || []).map(a => File.findById(typeof a === 'string' ? a : a._id))
+  );
+  const urls = attachments.map(a => a.url);
+  const $ = cheerio.load(notice.content);
+  $('img').each((i, img) => urls.push($(img).attr('src')));
+  await File.updateMany({ url: { $in: urls } }, { target: id, targetModel: 'Notice' });
+  return urls;
+};
+
+const removeFiles = async (target, urls) => {
+  const files = (await File.find({ target, targetModel: 'Notice' }))
+    .filter(file => !urls.includes(file.url));
+  await Promise.all(files.map(file => file.deleteOne()));
+};
 
 const getNotices = async (req, res, next) => {
   try {
@@ -13,7 +31,9 @@ const getNotices = async (req, res, next) => {
 const getNotice = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const notice = await Notice.findById(id).populate({ path: 'author', select: 'name' });
+    const notice = await Notice.findById(id)
+      .populate({ path: 'author', select: 'name' })
+      .populate({ path: 'attachments' });
     notice.hits++;
     notice.save();
     res.json({ success: true, data: notice });
@@ -28,15 +48,25 @@ const createNotice = async (req, res, next) => {
   notice.author = req.user._id;
   try {
     notice = await Notice.create(notice);
+    await removeFiles(notice._id, getUrls(notice._id, notice));
     res.json({ success: true, data: notice._id });
   } catch (e) {
     next(e);
   }
 };
 
-const uploadImage = async (req, res, next) => {
-  console.log(req.file);
-  res.json({});
+const upload = async (req, res, next) => {
+  if (req.file) {
+    const file = {
+      url: `/uploads/${req.file.filename}`,
+      target: null,
+      targetModel: null,
+      ...req.file,
+    };
+    res.json({ success: true, data: await File.create(file) });
+  } else {
+    res.json({ success: false })
+  }
 };
 
 const updateNotice = async (req, res, next) => {
@@ -49,6 +79,8 @@ const updateNotice = async (req, res, next) => {
       return next(createErrors(403, 'forbidden'));
     }
     await notice.updateOne({ $set });
+    await removeFiles(id, await getUrls(notice._id, $set));
+
     res.json({ success: true });
   } catch (e) {
     next(e);
@@ -58,7 +90,14 @@ const updateNotice = async (req, res, next) => {
 const removeNotice = async (req, res, next) => {
   const { id } = req.params;
   try {
-
+    const notice = await Notice.findById(id);
+    if (!notice) {
+      res.json({ success: false, message: 'notice is not existed.' });
+    } else {
+      await notice.deleteOne();
+      await removeFiles(notice._id, getUrls(notice._id, notice));
+      res.json({ success: true });
+    }
   } catch (e) {
     next(e);
   }
@@ -67,6 +106,6 @@ const removeNotice = async (req, res, next) => {
 exports.getNotices = getNotices;
 exports.getNotice = getNotice;
 exports.createNotice = createNotice;
-exports.uploadImage = uploadImage;
+exports.upload = upload;
 exports.updateNotice = updateNotice;
 exports.removeNotice = removeNotice;

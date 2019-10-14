@@ -3,6 +3,7 @@ const logger = require('morgan');
 const passport = require('passport');
 const { join } = require('path');
 const router = require('./routes');
+const { uploads } = require('./config');
 
 require('dotenv').config();
 require('./passport')(passport);
@@ -11,7 +12,7 @@ const PORT = +(process.env.PORT || 4000);
 const app = express();
 
 app.enable('trust proxy');
-app.use('/resources', express.static(join(__dirname, 'resources')));
+app.use('/uploads', express.static(uploads));
 app.use(logger(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
