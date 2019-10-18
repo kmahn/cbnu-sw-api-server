@@ -30,11 +30,24 @@ const getNotices = async (req, res, next) => {
 
 const getNotice = async (req, res, next) => {
   const { id } = req.params;
+  let query;
+
+  const no = Number(id);
+
+  if (Number.isNaN(no)) {
+    query = Notice.findById(id);
+  } else {
+    query = Notice.findOne({ no });
+  }
+
   try {
-    const notice = await Notice.findById(id)
+    const notice = await query
       .populate({ path: 'author', select: 'name' })
-      .populate({ path: 'attachments' });
-    notice.hits++;
+      .populate({ path: 'attachments' })
+      .exec();
+    if (!req.user || req.user.role === 'admin') {
+      notice.hits++;
+    }
     notice.save();
     res.json({ success: true, data: notice });
   } catch (e) {
@@ -73,8 +86,17 @@ const updateNotice = async (req, res, next) => {
   const { id } = req.params;
   const $set = req.body;
 
+  let query;
+  const no = Number(id);
+
+  if (Number.isNaN(no)) {
+    query = Notice.findById(id);
+  } else {
+    query = Notice.findOne({ no });
+  }
+
   try {
-    const notice = await Notice.findById(id);
+    const notice = await query.exec();
     if (String(notice.author) !== String(req.user._id)) {
       return next(createErrors(403, 'forbidden'));
     }
