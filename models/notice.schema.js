@@ -26,6 +26,10 @@ const schema = new Schema({
   timestamps: true
 });
 
+schema.statics.findByNo = function (no, cb) {
+  return this.findOne({ no }, cb);
+};
+
 schema.index({ no: -1 }, { unique: true });
 schema.index({ createdAt: -1 });
 schema.plugin(autoIncrementPlugin(__filename, 'no'));

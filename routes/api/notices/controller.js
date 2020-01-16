@@ -30,24 +30,18 @@ const getNotices = async (req, res, next) => {
 
 const getNotice = async (req, res, next) => {
   const { id } = req.params;
-  let query;
-
   const no = Number(id);
 
-  if (Number.isNaN(no)) {
-    query = Notice.findById(id);
-  } else {
-    query = Notice.findOne({ no });
-  }
-
   try {
+    const query = Number.isNaN(no) ? Notice.findById(id) : Notice.findByNo(no);
     const notice = await query
       .populate({ path: 'author', select: 'name' })
       .populate({ path: 'attachments' })
       .exec();
-    if (!req.user || req.user.role === 'admin') {
-      notice.hits++;
-    }
+
+    if (!notice) return next(createErrors(404, '찾을 수 없는 공지입니다.'));
+
+    if (!req.user || req.user.role !== 'admin') notice.hits++;
     notice.save();
     res.json({ success: true, data: notice });
   } catch (e) {
